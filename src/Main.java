@@ -1,15 +1,23 @@
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            list.add(i);
+        List<Integer> linkedList = new LinkedList<>();
+        List<Integer> arrayList = new ArrayList<>();
+        measureTime(linkedList);
+        measureTime(arrayList);
+    }
+    private static  void  measureTime(List<Integer> list) {
+
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++){
+            list.add(0,i);
         }
-        System.out.println(list);
-        System.out.println(Integer.toBinaryString(Integer.MAX_VALUE).length());
-        System.out.println(Integer.MIN_VALUE);
-        System.out.println(Integer.toBinaryString(Integer.MIN_VALUE));
+
+        long end = System.currentTimeMillis();
+        System.out.println(list.getClass().toString()+" time: "+ (end-start));
+
     }
 }
