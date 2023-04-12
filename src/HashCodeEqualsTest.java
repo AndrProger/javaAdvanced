@@ -6,7 +6,9 @@ public class HashCodeEqualsTest {
         Set<Person> set = new HashSet<>();
 
         Person person1 = new Person(1,"Mike");
-        Person person2 = new Person(1,"Mike");
+        Person person2 = new Person(2,"stasseer");
+        System.out.println(person1.hashCode());
+        System.out.println(person2.hashCode());
 
         map.put(person1, "123");
         map.put(person2, "123");
@@ -17,7 +19,7 @@ public class HashCodeEqualsTest {
         System.out.println(set);
     }
 }
-class Person {
+class Person implements Comparable<Person> {
     private int id;
     private String name;
 
@@ -50,5 +52,28 @@ class Person {
         int result = id;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public int compareTo(Person o) {
+        if(this.id > o.getId()) return 1;
+        if(this.id < o.getId()) return -1;
+        return 0;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
