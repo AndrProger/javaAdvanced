@@ -1,28 +1,27 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class Test {
-    private  static BlockingQueue<Integer> queue= new ArrayBlockingQueue<>(10);
+
     public static void main(String[] args) throws InterruptedException {
+        ProducersConsumer producersConsumer=new ProducersConsumer();
+
         Thread thread1=new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    produce();
-                }
-                catch (InterruptedException e){
-                    e.printStackTrace();
+                    producersConsumer.produce();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
-        Thread thread2=new Thread(new Runnable() {
+
+        Thread thread2 = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    consumer();
+                    producersConsumer.consume();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -35,24 +34,43 @@ public class Test {
         thread2.join();
     }
 
-    private static void produce() throws InterruptedException {
-        Random random=new Random();
 
-        while (true){
-            queue.put(random.nextInt(100));
-        }
+
+}
+
+class ProducersConsumer{
+    private Queue<Integer> queue=new LinkedList<>();
+    private final int LIMIT=10;
+    private final Object lock=new Object();
+    public void  produce() throws InterruptedException {
+        int value=0;
+      while (true) {
+
+          synchronized (lock) {
+              System.out.println("start producer");
+              while (queue.size() == LIMIT) {
+                  System.out.println("producer wait size:"+queue.size());
+                  lock.wait();
+              }
+              queue.offer(value++);
+              lock.notify();
+          }
+      }
     }
-
-    private static void consumer() throws InterruptedException {
-        Random random=new Random();
-        while (true){
-            Thread.sleep(100);
-            if(random.nextInt(10)==5){
-                System.out.println(queue.take());
-                System.out.println("Queue size is "+queue.size());
-            }
-
-        }
+    public void consume() throws InterruptedException {
+       while (true) {
+           while (queue.size() == LIMIT) {
+               synchronized (lock) {
+                   while (queue.size() == 0) {
+                       lock.wait();
+                   }
+                   int value=queue.poll();
+                   System.out.println(value);
+                   System.out.println("queue size is "+queue.size());
+                   lock.notify();
+               }
+           }
+           Thread.sleep(1000);
+       }
     }
-
 }
