@@ -1,47 +1,56 @@
 import java.lang.annotation.Target;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Test {
 
     public static void main(String[] args) throws InterruptedException {
-        CountDownLatch countDownLatch=new CountDownLatch(3);
-        ExecutorService executorService=Executors.newFixedThreadPool(3);
-        for (int i=0; i<3; i++) {
+        Task task=new Task();
+        Thread thread1=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                task.firstThread();
+            }
+        });
+        Thread thread2=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                task.secondThread();
+            }
+        });
+        thread1.start();
+        thread2.start();
 
-            executorService.submit(new Processor(i,countDownLatch));
-        }
-        executorService.shutdown();
+        thread1.join();
+        thread2.join();
 
+        task.showCounter();
 
-        for (int i=0; i<3; i++) {
-            Thread.sleep(1000);
-            countDownLatch.countDown();
-        }
     }
+
 
 }
-class Processor implements Runnable {
-    private  int i;
-    private  CountDownLatch countDownLatch;
-
-    public Processor(int i, CountDownLatch countDownLatch) {
-        this.i = i;
-        this.countDownLatch = countDownLatch;
+class Task{
+    private int counter;
+    private Lock look=new ReentrantLock();
+    private  void increment() {
+        for (int i = 0; i <10000;i++) {
+            counter++;
+        }
     }
-
-    @Override
-    public void run() {
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("Thread " + i + "processed");
+    public void  firstThread(){
+        look.lock();
+        increment();
+        look.unlock();
+    }
+    public void  secondThread(){
+        look.lock();
+        increment();
+        look.unlock();
+    }
+    public void showCounter(){
+        System.out.println(counter);
     }
 }
