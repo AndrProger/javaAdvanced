@@ -7,50 +7,57 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Test {
 
     public static void main(String[] args) throws InterruptedException {
-        Task task=new Task();
-        Thread thread1=new Thread(new Runnable() {
-            @Override
-            public void run() {
-                task.firstThread();
-            }
-        });
-        Thread thread2=new Thread(new Runnable() {
-            @Override
-            public void run() {
-                task.secondThread();
-            }
-        });
-        thread1.start();
-        thread2.start();
+        ExecutorService executorService = Executors.newFixedThreadPool(25);
+        Connection connection = Connection.getConnection();
+        for (int i = 0; i < 20; i++) {
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        connection.doWork();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            executorService.shutdown();
+            executorService.awaitTermination(1, TimeUnit.DAYS);
 
-        thread1.join();
-        thread2.join();
-
-        task.showCounter();
-
+        }
     }
 
 
 }
-class Task{
-    private int counter;
-    private Lock look=new ReentrantLock();
-    private  void increment() {
-        for (int i = 0; i <10000;i++) {
-            counter++;
+
+class Connection {
+    private static final Connection conn = new Connection();
+    private Semaphore semaphore = new Semaphore(10);
+    private int connectionCount = 0;
+
+    private Connection() {
+
+    }
+
+    public static Connection getConnection() {
+        return conn;
+    }
+
+    public void work() throws InterruptedException {
+        semaphore.acquire();
+        try {
+            doWork();
+        } finally {
+            semaphore.release();
         }
     }
-    public void  firstThread(){
-        look.lock();
-        increment();
-        look.unlock();
-    }
-    public void  secondThread(){
-        look.lock();
-        increment();
-        look.unlock();
-    }
-    public void showCounter(){
-        System.out.println(counter);
+
+    public void doWork() throws InterruptedException {
+        synchronized (this) {
+            connectionCount++;
+        }
+        Thread.sleep(5000);
+        synchronized (this) {
+            connectionCount--;
+        }
     }
 }
