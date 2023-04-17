@@ -7,27 +7,36 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Test {
 
     public static void main(String[] args) throws InterruptedException {
-
-        Thread thread =new Thread(new Runnable() {
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        Future<Integer> future = executor.submit(new Callable<Integer>() {
             @Override
-            public void run() {
-                Random rand = new Random();
-                for (int i=0; i<1_000_000_000;i++) {
-                    if(Thread.currentThread().isInterrupted()) {
-                        System.out.println("thread was interrupted");
-                        break;
-                    }
-                    Math.sin(rand.nextDouble());
+            public Integer call() throws Exception {
+                System.out.println("Starting");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
+                System.out.println("Finished");
+
+                Random rand = new Random();
+                int random=rand.nextInt(10);
+                if(random<5){
+                    throw new Exception("Bad");
+                }
+                return random;
             }
         });
+        executor.shutdown();
 
-        System.out.println("Starting thread");
-        thread.start();
-        Thread.sleep(1000);
-        thread.interrupt();
-        thread.join();
-        System.out.println("Thread has finished");
+        try {
+            int result = future.get();
+            System.out.println(result);
+        } catch (ExecutionException e) {
+            Throwable ex =e.getCause();
+            System.out.println(ex.getMessage());
+        }
+
+
     }
-
 }
