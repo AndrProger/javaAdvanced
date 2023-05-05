@@ -3,10 +3,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MethodInfo {
-    String author() default "Author";
-    int dateOfCreation() default  2023;
-    String purpose();
+public @interface Author {
+    String name();
+    int dateOfCreation();
+
 }
