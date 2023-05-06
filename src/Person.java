@@ -4,6 +4,8 @@ public class Person {
     private String name;
 
     public Person() {
+        this.id=-1;
+        this.name="No name";
     }
 
     public Person(int id, String name) {
@@ -28,5 +30,13 @@ public class Person {
     }
     public void sayHello(){
         System.out.println("Person with id " + id + "and name " + name + "says hello!");
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

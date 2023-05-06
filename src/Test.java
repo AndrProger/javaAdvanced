@@ -1,37 +1,30 @@
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class Test {
-    public static void main(String[] args) throws ClassNotFoundException {
-        Person person = new Person();
-        Class personClass1 =Person.class;
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        Scanner scanner =new Scanner(System.in);
+        //название класса 1  название класса 2 Название метода
+        Class<?> classObj1 = Class.forName(scanner.next());
+        Class<?> classObj2 = Class.forName(scanner.next());
 
-        Class personClass2 = person.getClass();
-        Class personClass3 = Class.forName("Person");
+        String methodName = scanner.next();
 
-        Method[] methods = personClass1.getMethods();
-//        for(Method method: methods) {
-//            System.out.println(
-//                    method.getName() + ", " + method.getReturnType() + ", " + Arrays.toString(method.getParameterTypes())
-//            );
-//        }
-//        Field[] fields = personClass1.getDeclaredFields();
-//        for(Field field: fields) {
-//            System.out.println(
-//                    field.getName() + ", " + field.getType()
-//            );
-//        }
-        Annotation[] annotations = personClass1.getAnnotations();
-        for(Annotation annotation: annotations) {
-           if(annotation instanceof Author){
-               System.out.println("Yes");
-           }
-        }
-    }
+        Method m =classObj1.getMethod(methodName,classObj2);
 
-    public Test() throws ClassNotFoundException {
+        Object o1 =classObj1.newInstance();
+        Object o2 =classObj2.getConstructor(String.class).newInstance("String value");
+
+        m.invoke(o1, o2);
+
+        System.out.println(o1);
+
 
     }
+
+
 }
